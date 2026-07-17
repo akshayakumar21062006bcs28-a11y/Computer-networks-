@@ -1,0 +1,60 @@
+#include <stdlib.h>
+
+typedef struct TrieNode {
+    struct TrieNode *child[2];
+} TrieNode;
+
+TrieNode* createNode() {
+    TrieNode* node = (TrieNode*)malloc(sizeof(TrieNode));
+    node->child[0] = NULL;
+    node->child[1] = NULL;
+    return node;
+}
+
+void insert(TrieNode* root, int num) {
+    TrieNode* curr = root;
+
+    for (int i = 31; i >= 0; i--) {
+        int bit = (num >> i) & 1;
+
+        if (curr->child[bit] == NULL)
+            curr->child[bit] = createNode();
+
+        curr = curr->child[bit];
+    }
+}
+
+int search(TrieNode* root, int num) {
+    TrieNode* curr = root;
+    int ans = 0;
+
+    for (int i = 31; i >= 0; i--) {
+        int bit = (num >> i) & 1;
+
+        if (curr->child[1 - bit] != NULL) {
+            ans |= (1U << i);
+            curr = curr->child[1 - bit];
+        } else {
+            curr = curr->child[bit];
+        }
+    }
+
+    return ans;
+}
+
+int findMaximumXOR(int* nums, int numsSize) {
+    TrieNode* root = createNode();
+
+    for (int i = 0; i < numsSize; i++)
+        insert(root, nums[i]);
+
+    int maxXor = 0;
+
+    for (int i = 0; i < numsSize; i++) {
+        int val = search(root, nums[i]);
+        if (val > maxXor)
+            maxXor = val;
+    }
+
+    return maxXor;
+}
